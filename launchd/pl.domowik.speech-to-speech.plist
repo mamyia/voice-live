@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>pl.domowik.speech-to-speech</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- TODO: popraw ścieżkę do swojego klonu speech-to-speech -->
+    <string>/Users/mamiya/speech-to-speech/.venv/bin/speech-to-speech</string>
+    <string>serve</string>
+    <string>-f</string>
+    <string>mac.yaml</string>
+    <string>--name</string>
+    <string>mac</string>
+  </array>
+
+  <key>WorkingDirectory</key><string>/Users/mamiya/speech-to-speech</string>
+
+  <!-- URL i klucz z Conduita trzymamy tu, nie w YAML — nic wrażliwego w pliku mac.yaml -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>CONDUIT_URL</key><string>ADRES_Z_CONDUITA</string>
+    <key>CONDUIT_KEY</key><string>KLUCZ_Z_CONDUITA</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>30</integer>
+  <key>StandardOutPath</key><string>/Users/mamiya/Library/Logs/speech-to-speech.log</string>
+  <key>StandardErrorPath</key><string>/Users/mamiya/Library/Logs/speech-to-speech.log</string>
+</dict>
+</plist>

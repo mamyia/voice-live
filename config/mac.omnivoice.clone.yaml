@@ -1,0 +1,38 @@
+schema_version: 1
+blocks:
+  vad: {kind: vad, backend: silero}
+  stt: {kind: stt, backend: parakeet-tdt}
+  llm:
+    kind: llm
+    backend: chat-completions
+    settings:
+      model_name: conduit
+      # Z Conduita: Settings -> Voice -> Private voice -> "Your speech server speaks too"
+      # pojawią się Model address i Key. Wklej je TUTAJ w cudzysłowach (albo użyj
+      # wariantu z {env: ...} i launchd, patrz launchd/).
+      responses_api_base_url: "ADRES_Z_CONDUITA"
+      responses_api_api_key: "KLUCZ_Z_CONDUITA"
+      stream_batch_sentences: 1
+  tts:
+    kind: tts
+    backend: omnivoice
+    settings:
+      omnivoice_device: mps
+      omnivoice_dtype: float16
+      omnivoice_language: Polish
+      # Klonowanie: wskaż czystą próbkę 3-10 s + jej DOKŁADNY transkrypt
+      # (to, co mówi ta próbka, po polsku). Ref_audio i ref_text muszą pasować,
+      # inaczej model wypowie początek w nieznanym języku.
+      omnivoice_ref_audio: ref/moj_glos.wav
+      omnivoice_ref_text: "Cześć! To jest próbka głosu do klonowania."
+      omnivoice_num_steps: 16
+pipelines:
+  mac:
+    options:
+      mac_optimal_settings: true
+    stages: {vad: vad, stt: stt, llm: llm, tts: tts}
+    num_pipelines: 2
+runtime:
+  server:
+    host: 0.0.0.0
+    port: 8765

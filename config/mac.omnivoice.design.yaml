@@ -1,0 +1,36 @@
+schema_version: 1
+blocks:
+  vad: {kind: vad, backend: silero}
+  stt: {kind: stt, backend: parakeet-tdt}
+  llm:
+    kind: llm
+    backend: chat-completions
+    settings:
+      model_name: conduit
+      # Z Conduita: Settings -> Voice -> Private voice -> "Your speech server speaks too"
+      # pojawią się Model address i Key. Wklej je TUTAJ w cudzysłowach (albo użyj
+      # wariantu z {env: ...} i launchd, patrz launchd/).
+      responses_api_base_url: "ADRES_Z_CONDUITA"
+      responses_api_api_key: "KLUCZ_Z_CONDUITA"
+      stream_batch_sentences: 1
+  tts:
+    kind: tts
+    backend: omnivoice
+    settings:
+      omnivoice_device: mps           # Apple Silicon; cpu gdyby mps nie działało
+      omnivoice_dtype: float16
+      omnivoice_language: Polish
+      # Głos projektowany — opis barwy po angielsku, np.:
+      #   female / male, young adult, low/high pitch, accent...
+      omnivoice_instruct: "female, young adult"
+      omnivoice_num_steps: 16         # mniej = szybciej, 32 = jakościowo
+pipelines:
+  mac:
+    options:
+      mac_optimal_settings: true
+    stages: {vad: vad, stt: stt, llm: llm, tts: tts}
+    num_pipelines: 2
+runtime:
+  server:
+    host: 0.0.0.0
+    port: 8765

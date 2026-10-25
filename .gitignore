@@ -6,3 +6,8 @@ tmp.wav
 .env
 odp.mp3
 *.onnx
+# prywatne próbki głosu do klonowania (nigdy do publicznego repo)
+ref/*.wav
+ref/*.mp3
+ref/*.m4a
+ref/*.txt
