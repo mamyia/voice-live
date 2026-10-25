@@ -30,8 +30,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# token do routera
-export ROUTER_API_KEY="sk-..."
+# token do routera (plik .env jest w .gitignore)
+echo 'ROUTER_API_KEY=twoj-prawdziwy-token' > .env
 ```
 
 ## Uruchomienie

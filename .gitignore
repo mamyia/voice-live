@@ -3,3 +3,4 @@ __pycache__/
 tmp.wav
 *.bin
 .DS_Store
+.env

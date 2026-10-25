@@ -8,6 +8,19 @@ import wave
 
 import requests
 
+def _load_dotenv(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")):
+    """Wczytaj KEY=VALUE z .env (zmienne już ustawione w środowisku mają pierwszeństwo)."""
+    if not os.path.exists(path):
+        return
+    for line in open(path):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
+
+
+_load_dotenv()
+
 # --- konfiguracja (środowisko nadpisuje) ---
 ROUTER_BASE = os.environ.get("ROUTER_BASE", "https://9router.kaizen.beer/v1")
 ROUTER_API_KEY = os.environ.get("ROUTER_API_KEY", "").strip()
