@@ -2,6 +2,7 @@
 """push-to-talk demo: nagrywa z mikrofonu, transkrybuję whisper-cli, pyta model przez 9router."""
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -31,6 +32,10 @@ MODEL = os.environ.get("ROUTER_MODEL", "daily")
 WHISPER_BIN = os.environ.get("WHISPER_BIN", "whisper-cli")
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "models/ggml-small.bin")
 WHISPER_LANG = os.environ.get("WHISPER_LANG", "pl")
+
+TTS = os.environ.get("TTS", "1") != "0"          # TTS=0 wyłącza mówienie
+TTS_VOICE = os.environ.get("TTS_VOICE", "Zosia")  # polski głos macOS; lista: say -v '?'
+TTS_RATE = os.environ.get("TTS_RATE", "190")      # słów na minutę
 
 SYSTEM_PROMPT = "Jesteś pomocnym asystentem. Odpowiadaj zwięźle po polsku."
 
@@ -106,6 +111,22 @@ def zapytaj(text):
     return odp
 
 
+def mow(text):
+    """Przeczytaj odpowiedź głosem (macOS `say`). Blokuje do końca, żeby nie nagrać siebie."""
+    if not TTS:
+        return
+    clean = re.sub(r"[*_`#>]+", "", text)             # markdown -> czysty tekst
+    clean = re.sub(r"https?://\S+", "", clean)
+    try:
+        r = subprocess.run(["say", "-v", TTS_VOICE, "-r", TTS_RATE, clean], capture_output=True)
+        if r.returncode != 0:                           # brak głosu -> domyślny
+            subprocess.run(["say", "-r", TTS_RATE, clean])
+    except FileNotFoundError:
+        print("(brak komendy `say` — TTS działa tylko na macOS; ustaw TTS=0)")
+    except KeyboardInterrupt:
+        subprocess.run(["killall", "say"], capture_output=True)
+
+
 def main():
     secs = float(sys.argv[1]) if len(sys.argv) > 1 else 6.0
     while True:
@@ -122,7 +143,9 @@ def main():
             continue
         print(f"Ty: {text}")
         try:
-            print(f"AI: {zapytaj(text)}\n")
+            odp = zapytaj(text)
+            print(f"AI: {odp}\n")
+            mow(odp)
         except requests.RequestException as e:
             print(f"❌ 9router: {e}\n")
 

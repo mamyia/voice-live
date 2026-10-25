@@ -43,6 +43,12 @@ python czat.py 10     # dłuższe nagrania (10 s)
 
 Każdy Enter = kolejna "tura" rozmowy. Ctrl+C kończy.
 
+## Głos odpowiedzi
+
+Na macOS odpowiedzi są czytane wbudowanym `say` (głos **Zosia**, nic do instalowania).
+Jeśli nie masz polskiego głosu: Ustawienia systemowe → Dostępność → Treść mówiona → Głos systemowy → Zarządzaj głosami.
+Wyłączenie: `TTS=0 python czat.py`. Inne głosy: `say -v '?'`.
+
 ## Zmienne środowiskowe
 
 | Zmienna | Domyślnie | Opis |
@@ -53,6 +59,9 @@ Każdy Enter = kolejna "tura" rozmowy. Ctrl+C kończy.
 | `WHISPER_BIN` | `whisper-cli` | ścieżka do binarki |
 | `WHISPER_MODEL` | `models/ggml-small.bin` | plik modelu whisper |
 | `WHISPER_LANG` | `pl` | język transkrypcji |
+| `TTS` | `1` | `0` wyłącza czytanie odpowiedzi |
+| `TTS_VOICE` | `Zosia` | głos macOS (`say -v '?'`) |
+| `TTS_RATE` | `190` | tempo (słowa/min) |
 
 ## Rozszerzenia (pomysły)
 
