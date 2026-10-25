@@ -10,7 +10,9 @@ import requests
 
 # --- konfiguracja (środowisko nadpisuje) ---
 ROUTER_BASE = os.environ.get("ROUTER_BASE", "https://9router.kaizen.beer/v1")
-ROUTER_API_KEY = os.environ["ROUTER_API_KEY"]
+ROUTER_API_KEY = os.environ.get("ROUTER_API_KEY", "").strip()
+if not ROUTER_API_KEY or ROUTER_API_KEY.startswith("sk-..."):
+    sys.exit("Ustaw prawdziwy token: export ROUTER_API_KEY=\"...\"")
 MODEL = os.environ.get("ROUTER_MODEL", "daily")
 WHISPER_BIN = os.environ.get("WHISPER_BIN", "whisper-cli")
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "models/ggml-small.bin")
@@ -42,7 +44,11 @@ def transkrybuj(path="tmp.wav"):
     )
     if out.returncode != 0:
         sys.exit(f"whisper-cli failed: {out.stderr}")
-    return out.stdout.strip()
+    text = out.stdout.strip()
+    # whisper zwraca znaczniki typu [MUZYKA], (cisza) dla braku mowy
+    if text.startswith(("[", "(")) and text.endswith(("]", ")")):
+        return ""
+    return text
 
 
 def zapytaj(text):
@@ -52,7 +58,8 @@ def zapytaj(text):
         json={"model": MODEL, "messages": HISTORY + [{"role": "user", "content": text}]},
         timeout=120,
     )
-    r.raise_for_status()
+    if not r.ok:
+        raise requests.HTTPError(f"{r.status_code}: {r.text[:300]}")
     odp = r.json()["choices"][0]["message"]["content"].strip()
     HISTORY.append({"role": "user", "content": text})
     HISTORY.append({"role": "assistant", "content": odp})
@@ -66,7 +73,10 @@ def main():
             nagrywaj(secs)
         except KeyboardInterrupt:
             break
-        text = transkrybuj()
+        try:
+            text = transkrybuj()
+        except KeyboardInterrupt:
+            break
         if not text:
             print("(cisza — nic nie usłyszałem)")
             continue
