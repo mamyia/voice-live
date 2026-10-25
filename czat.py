@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """push-to-talk demo: nagrywa z mikrofonu, transkrybuję whisper-cli, pyta model przez 9router."""
+import json
 import os
 import subprocess
 import sys
@@ -64,16 +65,42 @@ def transkrybuj(path="tmp.wav"):
     return text
 
 
+def _parse_reply(r):
+    """Wyciągnij tekst odpowiedzi z JSON-a lub z strumienia SSE; przy błędzie pokaż surową treść."""
+    body = r.text.strip()
+    ctype = r.headers.get("content-type", "?")
+    try:
+        if body.startswith("data:"):  # SSE mimo stream=false
+            parts = []
+            for line in body.splitlines():
+                line = line.strip()
+                if not line.startswith("data:") or line.endswith("[DONE]"):
+                    continue
+                ch = json.loads(line[5:].strip())["choices"][0]
+                parts.append((ch.get("delta") or ch.get("message") or {}).get("content") or "")
+            return "".join(parts).strip()
+        msg = r.json()["choices"][0]["message"]
+        return (msg.get("content") or "").strip()
+    except (ValueError, KeyError, IndexError, TypeError) as e:
+        raise requests.RequestException(
+            f"nie umiem odczytać odpowiedzi ({e}); status={r.status_code} "
+            f"content-type={ctype} body[:300]={body[:300]!r}"
+        )
+
+
 def zapytaj(text):
     r = requests.post(
         f"{ROUTER_BASE}/chat/completions",
-        headers={"Authorization": f"Bearer {ROUTER_API_KEY}"},
-        json={"model": MODEL, "messages": HISTORY + [{"role": "user", "content": text}]},
+        headers={"Authorization": f"Bearer {ROUTER_API_KEY}", "Accept": "application/json"},
+        json={"model": MODEL, "stream": False,
+              "messages": HISTORY + [{"role": "user", "content": text}]},
         timeout=120,
     )
     if not r.ok:
         raise requests.HTTPError(f"{r.status_code}: {r.text[:300]}")
-    odp = r.json()["choices"][0]["message"]["content"].strip()
+    odp = _parse_reply(r)
+    if not odp:
+        raise requests.RequestException(f"pusta odpowiedź modelu; body[:300]={r.text[:300]!r}")
     HISTORY.append({"role": "user", "content": text})
     HISTORY.append({"role": "assistant", "content": odp})
     return odp
