@@ -34,8 +34,9 @@ WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "models/ggml-small.bin")
 WHISPER_LANG = os.environ.get("WHISPER_LANG", "pl")
 
 TTS = os.environ.get("TTS", "1") != "0"          # TTS=0 wyłącza mówienie
-TTS_VOICE = os.environ.get("TTS_VOICE", "Zosia")  # polski głos macOS; lista: say -v '?'
-TTS_RATE = os.environ.get("TTS_RATE", "190")      # słów na minutę
+TTS_VOICE = os.environ.get("TTS_VOICE", "pl-PL-ZofiaNeural")  # lub pl-PL-MarekNeural
+TTS_RATE = os.environ.get("TTS_RATE", "190")              # tylko dla `say` (zapasowy)
+TTS_RATE_PCT = os.environ.get("TTS_RATE_PCT", "+0%")      # tempo edge-tts, np. +10% / -10%
 
 SYSTEM_PROMPT = "Jesteś pomocnym asystentem. Odpowiadaj zwięźle po polsku."
 
@@ -111,20 +112,42 @@ def zapytaj(text):
     return odp
 
 
+def _say_fallback(clean):
+    try:
+        subprocess.run(["say", "-r", TTS_RATE, clean])
+    except FileNotFoundError:
+        print("(brak głosu: zainstaluj edge-tts lub ustaw TTS=0)")
+
+
 def mow(text):
-    """Przeczytaj odpowiedź głosem (macOS `say`). Blokuje do końca, żeby nie nagrać siebie."""
+    """Przeczytaj odpowiedź głosem neuronowym (edge-tts), a gdy się nie uda — macOS `say`.
+    Blokuje do końca odtwarzania, żeby nie nagrać własnego głosu."""
     if not TTS:
         return
     clean = re.sub(r"[*_`#>]+", "", text)             # markdown -> czysty tekst
-    clean = re.sub(r"https?://\S+", "", clean)
+    clean = re.sub(r"https?://\S+", "", clean).strip()
+    if not clean:
+        return
+    path = "odp.mp3"
     try:
-        r = subprocess.run(["say", "-v", TTS_VOICE, "-r", TTS_RATE, clean], capture_output=True)
-        if r.returncode != 0:                           # brak głosu -> domyślny
-            subprocess.run(["say", "-r", TTS_RATE, clean])
-    except FileNotFoundError:
-        print("(brak komendy `say` — TTS działa tylko na macOS; ustaw TTS=0)")
+        r = subprocess.run(
+            [sys.executable, "-m", "edge_tts", "-v", TTS_VOICE, "--rate", TTS_RATE_PCT,
+             "-t", clean, "--write-media", path],
+            capture_output=True, text=True, timeout=30,
+        )
+        if r.returncode != 0 or not os.path.exists(path):
+            raise RuntimeError(r.stderr[-200:])
+        player = "afplay" if sys.platform == "darwin" else "ffplay"
+        args = [player, path] if player == "afplay" else [player, "-nodisp", "-autoexit", "-loglevel", "quiet", path]
+        subprocess.run(args)
     except KeyboardInterrupt:
-        subprocess.run(["killall", "say"], capture_output=True)
+        subprocess.run(["killall", "afplay"], capture_output=True)
+    except Exception as e:
+        print(f"(edge-tts nie zadziałał: {e}; używam `say`)")
+        _say_fallback(clean)
+    finally:
+        if os.path.exists(path):
+            os.remove(path)
 
 
 def main():
