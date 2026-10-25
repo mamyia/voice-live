@@ -15,25 +15,29 @@ idzie do zdalnego API — na tym samym protokole co OpenAI `/v1/chat/completions
 ## Instalacja (macOS, M1/M2 — sprawdzone na 16 GB)
 
 ```bash
-brew install llama.cpp            # daje whisper-cli? NIE — whisper osobno:
-brew install whisper-cpp          # whisper-cli + whisper-cpp
-# model whisper small po polsku (multilingwalny, ~475 MB):
-mkdir -p models && cd models
-curl -LO https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+git clone https://github.com/mamyia/voice-live && cd voice-live
 
-# python
+# whisper.cpp (daje binarkę whisper-cli)
+brew install whisper-cpp
+
+# model whisper small (wielojęzyczny, ~475 MB) -> models/ggml-small.bin
+mkdir -p models
+curl -L -o models/ggml-small.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+
+# python (wszystko z katalogu głównego repo)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# swój token do routera (sam ogarniasz):
+# token do routera
 export ROUTER_API_KEY="sk-..."
 ```
 
 ## Uruchomienie
 
 ```bash
-python czat.py        # pętla: nagrywa 6 s -> transkrybue -> pyta model -> odpowiada
+python czat.py        # pętla: nagrywa 6 s -> transkrybuje -> pyta model -> odpowiada
 python czat.py 10     # dłuższe nagrania (10 s)
 ```
 
