@@ -1,0 +1,29 @@
+# MacBook M1 (Apple Silicon). TTS = Supertonic 3. STT parakeet-tdt (MLX).
+schema_version: 1
+blocks:
+  vad: {kind: vad, backend: silero}
+  llm:
+    kind: llm
+    backend: chat-completions
+    settings:
+      model_name: conduit
+      responses_api_base_url: "ADRES_Z_CONDUITA"
+      responses_api_api_key: "KLUCZ_Z_CONDUITA"
+      stream_batch_sentences: 1
+  tts:
+    kind: tts
+    backend: supertonic
+    settings:
+      supertonic_tts_voice: F1     # F1-F5 żeńskie, M1-M5 męskie
+      supertonic_tts_lang: pl      # 'na' = auto z rozpoznania STT
+      supertonic_tts_speed: 1.16
+pipelines:
+  mac:
+    options:
+      mac_optimal_settings: true   # ustawia MLX/Parakeet/MPS dla macOS
+    stages: {vad: vad, stt: stt, llm: llm, tts: tts}
+    num_pipelines: 2
+runtime:
+  server:
+    host: 0.0.0.0
+    port: 8765
