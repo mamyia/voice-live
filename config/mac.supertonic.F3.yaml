@@ -2,6 +2,9 @@
 schema_version: 1
 blocks:
   vad: {kind: vad, backend: silero}
+  stt:
+    kind: stt
+    backend: parakeet-tdt
   llm:
     kind: llm
     backend: chat-completions
