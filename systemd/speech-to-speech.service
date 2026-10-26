@@ -1,0 +1,17 @@
+# ~/.config/systemd/user/speech-to-speech.service
+# systemctl --user daemon-reload && systemctl --user enable --now speech-to-speech
+# loginctl enable-linger $USER    # start bez logowania
+[Unit]
+Description=speech-to-speech (Conduit voice server)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/speech-to-speech
+Environment=CONDUIT_URL=ADRES_Z_CONDUITA
+Environment=CONDUIT_KEY=KLUCZ_Z_CONDUITA
+ExecStart=%h/speech-to-speech/.venv/bin/speech-to-speech serve -f pc.yaml --name pc
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

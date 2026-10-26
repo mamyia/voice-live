@@ -62,3 +62,16 @@ Zanim to zrobisz, w `config/mac.supertonic.yaml` (Supertonic) liczby poprawi zwy
 normalizer; w OmniVoice — tylko gdy masz `omnivoice[tn]` (WeTextProcessing), na
 macOS wymagane `conda install -c conda-forge pynini` (bez tego cyfry czyta
 słowo-po-słowie po angielsku).
+
+## PC: CachyOS + Radeon RX 9070 XT (ROCm)
+
+```bash
+bash pc/setup-cachyos.sh          # venv + PyTorch ROCm 7.1 + speech-to-speech + omnivoice
+cp config/pc.omnivoice.yaml ~/speech-to-speech/pc.yaml   # wpisz adres+klucz z Conduita
+cd ~/speech-to-speech && source .venv/bin/activate
+speech-to-speech serve -f pc.yaml --name pc
+```
+
+Usługa: `systemd/speech-to-speech.service` (instrukcja w nagłówku pliku).
+Nieprzetestowane na sprzęcie (autor nie ma dostępu do GPU AMD) — skrypt kończy się
+wypisaniem `torch.cuda.is_available()`; musi być `True`.

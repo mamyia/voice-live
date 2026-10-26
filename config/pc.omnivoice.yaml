@@ -1,0 +1,34 @@
+# CachyOS + Radeon RX 9070 XT (ROCm). W PyTorch ROCm urządzenie GPU nazywa się "cuda".
+schema_version: 1
+blocks:
+  vad: {kind: vad, backend: silero}
+  stt:
+    kind: stt
+    backend: parakeet-tdt
+    settings:
+      parakeet_tdt_device: cuda
+  llm:
+    kind: llm
+    backend: chat-completions
+    settings:
+      model_name: conduit
+      responses_api_base_url: "ADRES_Z_CONDUITA"
+      responses_api_api_key: "KLUCZ_Z_CONDUITA"
+      stream_batch_sentences: 1
+  tts:
+    kind: tts
+    backend: omnivoice
+    settings:
+      omnivoice_device: cuda
+      omnivoice_dtype: float16
+      omnivoice_language: Polish
+      omnivoice_instruct: "female, young adult"
+      omnivoice_num_steps: 32      # GPU ma zapas mocy; 16 gdyby było za wolno
+pipelines:
+  pc:
+    stages: {vad: vad, stt: stt, llm: llm, tts: tts}
+    num_pipelines: 2
+runtime:
+  server:
+    host: 0.0.0.0
+    port: 8765
