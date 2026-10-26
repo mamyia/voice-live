@@ -1,0 +1,40 @@
+# CachyOS + Radeon RX 9070 XT (ROCm). TTS = OmniVoice, KLON GŁOSU.
+# Barwa stała: zawsze ten sam plik referencyjny (ref/pl_kobieta.wav).
+# Wymagana instalacja: uv pip install "speech-to-speech[omnivoice]"
+# W Conduicie: Settings -> Voice -> Private voice -> "Your speech server speaks too"
+# -> wpisz adres i klucz w DWA miejsca ponizej.
+schema_version: 1
+blocks:
+  vad: {kind: vad, backend: silero}
+  stt:
+    kind: stt
+    backend: parakeet-tdt
+    settings:
+      parakeet_tdt_device: cuda
+  llm:
+    kind: llm
+    backend: chat-completions
+    settings:
+      model_name: conduit
+      responses_api_base_url: "ADRES_Z_CONDUITA"
+      responses_api_api_key: "KLUCZ_Z_CONDUITA"
+      stream_batch_sentences: 1
+  tts:
+    kind: tts
+    backend: omnivoice
+    settings:
+      omnivoice_device: cuda
+      omnivoice_dtype: float16
+      omnivoice_language: Polish
+      # Ścieżka WZGLĘDEM katalogu serwera (~/speech-to-speech):
+      omnivoice_ref_audio: ref/pl_kobieta.wav
+      omnivoice_ref_text: "Cześć! Pewnie, mogę ci w tym pomóc."
+      omnivoice_num_steps: 16      # mniej = szybciej start, 32 = najlepsza jakość
+pipelines:
+  pc:
+    stages: {vad: vad, stt: stt, llm: llm, tts: tts}
+    num_pipelines: 2
+runtime:
+  server:
+    host: 0.0.0.0
+    port: 8765
