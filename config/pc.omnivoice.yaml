@@ -23,7 +23,7 @@ blocks:
       omnivoice_dtype: float16
       omnivoice_language: Polish
       omnivoice_instruct: "female, young adult"
-      omnivoice_num_steps: 32      # GPU ma zapas mocy; 16 gdyby było za wolno
+      omnivoice_num_steps: 16         # mniej = szybszy pierwszy dźwięk
 pipelines:
   pc:
     stages: {vad: vad, stt: stt, llm: llm, tts: tts}
