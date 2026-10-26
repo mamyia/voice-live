@@ -1,4 +1,5 @@
 # CachyOS + Radeon RX 9070 XT (ROCm). W PyTorch ROCm urządzenie GPU nazywa się "cuda".
+# Źródło prawdy: https://github.com/mamyia/voice-live/blob/main/config/pc.omnivoice.design.yaml
 schema_version: 1
 blocks:
   vad: {kind: vad, backend: silero}
@@ -12,6 +13,9 @@ blocks:
     backend: chat-completions
     settings:
       model_name: conduit
+      # Z Conduita: Settings -> Voice -> Private voice -> "Your speech server speaks too"
+      # pojawią się Model address i Key. Wklej je TUTAJ w cudzysłowach (albo użyj
+      # wariantu z {env: ...} i systemd, patrz systemd/speech-to-speech.service).
       responses_api_base_url: "ADRES_Z_CONDUITA"
       responses_api_api_key: "KLUCZ_Z_CONDUITA"
       stream_batch_sentences: 1
@@ -23,7 +27,7 @@ blocks:
       omnivoice_dtype: float16
       omnivoice_language: Polish
       omnivoice_instruct: "female, young adult"
-      omnivoice_num_steps: 16         # mniej = szybszy pierwszy dźwięk
+      omnivoice_num_steps: 16  # mniej = szybszy pierwszy dźwięk
 pipelines:
   pc:
     stages: {vad: vad, stt: stt, llm: llm, tts: tts}
