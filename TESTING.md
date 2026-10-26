@@ -67,7 +67,7 @@ słowo-po-słowie po angielsku).
 
 ```bash
 bash pc/setup-cachyos.sh          # venv + PyTorch ROCm 7.1 + speech-to-speech + omnivoice
-cp config/pc.omnivoice.yaml ~/speech-to-speech/pc.yaml   # wpisz adres+klucz z Conduita
+cp config/pc.supertonic.yaml ~/speech-to-speech/pc.yaml   # wpisz adres+klucz z Conduita
 cd ~/speech-to-speech && source .venv/bin/activate
 speech-to-speech serve -f pc.yaml --name pc
 ```
