@@ -20,9 +20,9 @@ blocks:
     kind: tts
     backend: supertonic
     settings:
-      supertonic_tts_voice: F1     # F1-F5 zenskie, M1-M5 meskie
+      supertonic_tts_voice: F3
       supertonic_tts_lang: pl      # 'na' = auto z rozpoznania STT
-      supertonic_tts_speed: 1.15        # testowane 2026-10-26 na PC; 1.2 za szybkie, 1.0 za wolne
+      supertonic_tts_speed: 1.18        # testowane 2026-10-26 na PC
 pipelines:
   pc:
     stages: {vad: vad, stt: stt, llm: llm, tts: tts}
