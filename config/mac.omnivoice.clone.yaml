@@ -1,15 +1,16 @@
+# MacBook (Apple Silicon). TTS = OmniVoice w trybie KLONU (stała barwa głosu). STT parakeet-tdt (MLX).
+# Próbka referencyjna: assets/ref_pl_F3.wav (syntetyczny głos Supertonic F3) -> skopiuj do ~/speech-to-speech/ref/
 schema_version: 1
 blocks:
   vad: {kind: vad, backend: silero}
-  stt: {kind: stt, backend: parakeet-tdt}
+  stt:
+    kind: stt
+    backend: parakeet-tdt
   llm:
     kind: llm
     backend: chat-completions
     settings:
       model_name: conduit
-      # Z Conduita: Settings -> Voice -> Private voice -> "Your speech server speaks too"
-      # pojawią się Model address i Key. Wklej je TUTAJ w cudzysłowach (albo użyj
-      # wariantu z {env: ...} i launchd, patrz launchd/).
       responses_api_base_url: "ADRES_Z_CONDUITA"
       responses_api_api_key: "KLUCZ_Z_CONDUITA"
       stream_batch_sentences: 1
@@ -20,11 +21,8 @@ blocks:
       omnivoice_device: mps
       omnivoice_dtype: float16
       omnivoice_language: Polish
-      # Klonowanie: wskaż czystą próbkę 3-10 s + jej DOKŁADNY transkrypt
-      # (to, co mówi ta próbka, po polsku). Ref_audio i ref_text muszą pasować,
-      # inaczej model wypowie początek w nieznanym języku.
-      omnivoice_ref_audio: ref/moj_glos.wav
-      omnivoice_ref_text: "Cześć! To jest próbka głosu do klonowania."
+      omnivoice_ref_audio: ref/ref_pl_F3.wav
+      omnivoice_ref_text: "Cześć! Pewnie, mogę ci w tym pomóc. Zajrzałem do kalendarza i na jutro masz tylko jedno spotkanie."
       omnivoice_num_steps: 16
 pipelines:
   mac:
